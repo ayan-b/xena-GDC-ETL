@@ -4,7 +4,7 @@ import pandas as pd
 # rows represent IDs
 xena_dtype_row_ID = [
     "htseq_counts",
-    "htseq_fpkm-uq", 
+    "htseq_fpkm-uq",
     "htseq_fpkm",
     "mirna",
     "methylation450",
@@ -28,6 +28,7 @@ dest = "GDC_phenotype"
 
 # path to the project data
 PATH = "./"
+
 
 def remove_unused_rows():
     for cohort in cohorts:
