@@ -57,3 +57,18 @@ def test_merge_xena():
         expected = pd.read_csv(expected)
     os.unlink(PATH + name)
     actual.equals(expected)
+
+
+def test_remove_unused_rows():
+    cohorts = "TCGA-CHOL"
+    path_to_data = "tests/fixtures/"
+    utils.remove_unused_rows(cohorts, path_to_data)
+    actual = pd.read_csv(
+        "tests/fixtures/TCGA-CHOL/Xena_Matrices/TCGA-CHOL.GDC_phenotype.tsv",
+        sep="\t",
+    )
+    expected = pd.read_csv(
+        "tests/fixtures/modified_TCGA-CHOL_phenotype.tsv",
+        sep="\t",
+    )
+    actual.equals(expected)
