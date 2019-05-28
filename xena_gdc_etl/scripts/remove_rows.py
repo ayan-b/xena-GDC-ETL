@@ -27,7 +27,7 @@ cohorts = [
 dest = "GDC_phenotype"
 
 # path to the project data
-PATH = "/run/media/ayanb/New Volume1/GDC-Data/"
+PATH = "./"
 
 def remove_unused_rows():
     for cohort in cohorts:
