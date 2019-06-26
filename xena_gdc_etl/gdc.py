@@ -17,7 +17,12 @@ import warnings
 import pandas as pd
 import requests
 
-from .utils import mkdir_p, reduce_json_array
+from .utils import (
+    mkdir_p,
+    reduce_json_array,
+    extract_leaves,
+    get_intersection,
+)
 
 GDC_API_BASE = 'https://api.gdc.cancer.gov'
 _SUPPORTED_FILE_TYPES = {
@@ -488,3 +493,45 @@ def gdc_check_new(new_file_uuids):
     except:  # noqa: E722
         pass
     df.to_csv(sys.stdout, sep='\t', index=False)
+
+
+def map_fields(endpoint, project, field_1, field_2):
+    """Maps two fields in a dictionary.
+    Args:
+        endpoint (str): One string of GDC API supported endpoint.
+        project (str or list of str): A single project string or a list of
+            projects on which the data will be queried.
+        field_1 (str): First field for the mapping.
+        field_2 (str): Second field for the mapping.
+
+    Returns:
+        dict: The mapping between ``field_1`` and ``field_2``. Keys are
+            ``field_1`` and the corresponding values are mapped ``field_2``.
+    """
+
+    in_filter = {}
+    in_filter["cases.project.project_id"] = project
+    result = search(
+        endpoint=endpoint,
+        in_filter=in_filter,
+        fields=[field_1, field_2],
+        typ="json",
+    )
+    mapping = {}
+    fields_1 = field_1.split(".")
+    fields_2 = field_2.split(".")
+    field_intersections = get_intersection(fields_1, fields_2)
+    field_1_last = fields_1[-1]
+    field_2_last = fields_2[-1]
+    for hit in result:
+        for field in field_intersections:
+            hit = hit[field]
+        for data in hit:
+            field_1_leaves = []
+            field_2_leaves = []
+            extract_leaves(data, field_1_last, field_1_leaves)
+            extract_leaves(data, field_2_last, field_2_leaves)
+            assert len(field_2_leaves) == 1
+            for leaf in field_1_leaves:
+                mapping[leaf] = field_2_leaves[0]
+    return mapping

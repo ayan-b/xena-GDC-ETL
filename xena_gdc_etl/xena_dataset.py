@@ -366,6 +366,36 @@ def merge_sample_cols(
         return xena_matrix
 
 
+def handle_gistic(filelist):
+    """Handles GISTIC Data type.
+
+    Args:
+        filelist (list of path): The list of input raw data.
+
+    Returns:
+        pandas.core.frame.DataFrame: Ready to load Xena matrix.
+    """
+
+    assert len(filelist) == 1
+    print('\rProcessing file {}'.format(filelist[0]), end='')
+    df = pd.read_csv(
+        filelist[0],
+        sep="\t",
+        header=0,
+        comment='#',
+        index_col=0,
+    )
+    df = df.drop(["Gene ID", "Cytoband"], axis=1)
+    mapping = gdc.map_fields(
+        project="TCGA-CHOL",
+        endpoint="cases",
+        field_1="samples.portions.analytes.aliquots.aliquot_id",
+        field_2="samples.submitter_id",
+    )
+    df = df.rename(columns=mapping)
+    return df
+
+
 class XenaDataset(object):
     r"""XenaDataset represents for one Xena matrix in a Xena cohort.
 
@@ -882,6 +912,10 @@ class GDCOmicset(XenaDataset):
             'analysis.workflow_type':
             'VarScan2 Variant Aggregation and Masking',
         },
+        'gistic': {
+            'data_type': 'Gene Level Copy Number Scores',
+            'analysis.workflow_type': 'GISTIC - Copy Number Score',
+        },
         'methylation27': {
             'data_type': 'Methylation Beta Value',
             'platform': 'Illumina Human Methylation 27',
@@ -905,6 +939,7 @@ class GDCOmicset(XenaDataset):
         'mutect2_snv': 'submitter_id',
         'somaticsniper_snv': 'submitter_id',
         'varscan2_snv': 'submitter_id',
+        'gistic': 'submitter_id',
         'methylation27': 'cases.samples.submitter_id',
         'methylation450': 'cases.samples.submitter_id',
     }
@@ -932,6 +967,7 @@ class GDCOmicset(XenaDataset):
             snv_maf_matrix,
         )
     )
+    _RAWS2MATRIX_FUNCS['gistic'] = handle_gistic
     _RAWS2MATRIX_FUNCS.update(
         dict.fromkeys(
             ['methylation27', 'methylation450'],
