@@ -91,6 +91,7 @@ valid_dtype = [
     'varscan2_snv',
     'GDC_phenotype',
     'survival',
+    'gistic',
     'methylation27',
     'methylation450',
 ]

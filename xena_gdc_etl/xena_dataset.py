@@ -28,7 +28,7 @@ import numpy as np
 import pandas as pd
 
 from xena_gdc_etl import gdc
-from .utils import mkdir_p, requests_retry_session
+from .utils import mkdir_p, requests_retry_session, reduce_json_array
 from .constants import (
     GDC_XENA_COHORT,
     METADATA_TEMPLATE,
@@ -386,12 +386,14 @@ def handle_gistic(filelist):
         index_col=0,
     )
     df = df.drop(["Gene ID", "Cytoband"], axis=1)
-    mapping = gdc.map_fields(
-        project="TCGA-CHOL",
+    rows = list(df)
+    mapping = gdc.map_two_fields(
         endpoint="cases",
-        field_1="samples.portions.analytes.aliquots.aliquot_id",
-        field_2="samples.submitter_id",
+        input_field="samples.portions.analytes.aliquots.aliquot_id",
+        output_field="samples.submitter_id",
+        input_values=rows,
     )
+    mapping = reduce_json_array(mapping)
     df = df.rename(columns=mapping)
     return df
 
