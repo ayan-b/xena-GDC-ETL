@@ -1,6 +1,7 @@
 import os
 
 import pandas as pd
+import pytest
 
 from xena_gdc_etl import utils
 
@@ -30,31 +31,30 @@ def test_merge_xena():
     actual.equals(expected)
 
 
-def test_get_intersection():
-    list_1 = ["hello", "world", "earth"]
-    list_2 = ["hello", "world", "world", "earth"]
-    actual = utils.get_intersection(list_1, list_2)
-    expected = ["hello", "world"]
-    assert actual == expected
-
-
-def test_extract_leaves():
-    data = {
-        "analytes": [
+@pytest.mark.parametrize(
+    'raw,path,expect',
+    [
+        ({'a': 'b'}, '', []),
+        ([{'a': 'b'}, {'c': [{'d': 'e'}]}], 'c.d', ['e']),
+        (
             {
-                "aliquots": [
-                    {"aliquot_id": "35f8d837-f78c-4f88-a4cd-50ea2f9f9437"},
-                    {"aliquot_id": "48de3d5a-35d8-456d-a23e-e2dc25a840ac"},
-                    {"aliquot_id": "e6443c75-5f1d-45c6-8796-992dd51a0496"},
-                ]
-            }
-        ]
-    }
-    actual = []
-    utils.extract_leaves(data=data, last="aliquot_id", leaves=actual)
-    expected = [
-        "35f8d837-f78c-4f88-a4cd-50ea2f9f9437",
-        "48de3d5a-35d8-456d-a23e-e2dc25a840ac",
-        "e6443c75-5f1d-45c6-8796-992dd51a0496",
+                "submitter_id": "TCGA-AX-A064",
+                "samples": [{"portions": [{"analytes": [{"aliquots": [
+                    {
+                        "submitter_id": "TCGA-AX-A064-10A-01W-A027-09",
+                        "aliquot_id": "14163707-5628-4c1b-9efd-87f7dd11d300",
+                    },
+                    {
+                        "submitter_id": "TCGA-AX-A064-10A-01W-A028-08",
+                    }
+                ]}]}]}]
+            },
+            'samples.portions.analytes.aliquots.aliquot_id',
+            [
+                '14163707-5628-4c1b-9efd-87f7dd11d300',
+            ]
+        ),
     ]
-    assert actual == expected
+)
+def test_get_json_objects(raw, path, expect):
+    assert utils.get_json_objects(raw, path) == expect
