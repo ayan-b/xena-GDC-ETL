@@ -386,12 +386,12 @@ def handle_gistic(filelist):
         index_col=0,
     )
     df = df.drop(["Gene ID", "Cytoband"], axis=1)
-    rows = list(df)
+    columns = list(df)
     mapping = gdc.map_two_fields(
         endpoint="cases",
         input_field="samples.portions.analytes.aliquots.aliquot_id",
         output_field="samples.submitter_id",
-        input_values=rows,
+        input_values=columns,
     )
     mapping = reduce_json_array(mapping)
     df = df.rename(columns=mapping)
