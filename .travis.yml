@@ -6,9 +6,6 @@ python:
   - "3.6"
   - "3.5"
   - "3.4"
-env:
-  - MINIMUM_INSTALL=false
-  - MINIMUM_INSTALL=true
 
 before_install:
   - if [[ "$MINIMUM_INSTALL" = true ]]; then
