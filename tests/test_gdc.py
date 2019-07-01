@@ -30,28 +30,29 @@ def test_simple_and_filter():
     in_dict_2 = {'foo': 'bar', 'hello': ['world']}
     exclude_dict_2 = {'bar': 'foo', 'world': ['hello']}
     expected = {
-                    'op': 'and',
-                    'content': [
-                        {
-                            'op': 'in',
-                            'content': {'field': 'foo', 'value': ['bar']}
-                        },
-                        {
-                            'op': 'in',
-                            'content': {'field': 'hello', 'value': ['world']}
-                        },
-                        {
-                            'op': 'exclude',
-                            'content': {'field': 'bar', 'value': ['foo']}
-                        },
-                        {
-                            'op': 'exclude',
-                            'content': {'field': 'world', 'value': ['hello']}
-                        }
-                    ]
-                }
+        'op': 'and',
+        'content': [
+            {
+                'op': 'in',
+                'content': {'field': 'foo', 'value': ['bar']}
+            },
+            {
+                'op': 'in',
+                'content': {'field': 'hello', 'value': ['world']}
+            },
+            {
+                'op': 'exclude',
+                'content': {'field': 'bar', 'value': ['foo']}
+            },
+            {
+                'op': 'exclude',
+                'content': {'field': 'world', 'value': ['hello']}
+            }
+        ]
+    }
     actual = gdc.simple_and_filter(in_dict_2, exclude_dict_2)
     assert expected == actual
+    assert compare_dict(expected, actual)
 
 
 def test_reduce_json_array():
