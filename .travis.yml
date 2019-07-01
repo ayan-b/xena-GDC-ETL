@@ -14,7 +14,7 @@ before_install:
 install: pip install .
 script:
   - pip install pytest~=3.6.1 pytest-cov~=2.4
-  - pytest --cov=xena_gdc_etl -v
+  - pytest --cov=xena_gdc_etl -vvv
   - pip freeze
 
 jobs:
