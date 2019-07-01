@@ -51,8 +51,8 @@ def test_simple_and_filter():
         ]
     }
     actual = gdc.simple_and_filter(in_dict_2, exclude_dict_2)
-    assert expected == actual
     assert compare_dict(expected, actual)
+    assert expected == actual
 
 
 def test_reduce_json_array():
