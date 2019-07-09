@@ -1839,19 +1839,27 @@ class GDCSurvivalset(XenaDataset):
         survival_df['OS'] = (~survival_df['OS']).map(int)
         # Get samples to case map
         case_samples = gdc.search(
-            'cases',
-            in_filter={'project.project_id': self.projects},
-            fields='submitter_sample_ids',
+            'files',
+            in_filter={
+                'cases.project.project_id': self.projects,
+                'data_category': 'Sequencing Reads',
+            },
+            fields='cases.samples.submitter_id',
             typ='json',
         )
-        case_samples = [c for c in case_samples if 'submitter_sample_ids' in c]
+        # print(case_samples)
+        # case_samples = [c for c in case_samples if 'submitter_sample_ids' in c]
+        case_samples = gdc.reduce_json_array(case_samples)
         samples_df = pd.io.json.json_normalize(
-            case_samples, 'submitter_sample_ids', 'id'
-        ).rename(columns={0: 'sample'})
+            case_samples,
+        )
+        samples_df = samples_df.rename(columns={'cases.samples.submitter_id': 'sample'})
         sample_mask = samples_df['sample'].map(
             lambda s: s[-3:-1] not in ['10']
         )
         samples_df = samples_df[sample_mask]
+        print(samples_df)
+        print(survival_df)
         # Make sample indexed survival matrix
         df = (
             pd.merge(survival_df, samples_df, how='inner', on='id')
