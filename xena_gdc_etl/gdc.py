@@ -13,6 +13,7 @@ import json
 import os
 import sys
 import warnings
+import logging
 
 import pandas as pd
 import requests
@@ -431,6 +432,8 @@ def get_samples_clinical(projects=None):
     to_drops = set()
     for ele in reduced_json:
         to_drops |= set(get_to_drops(ele))
+    with open("result.txt", "a") as result:
+        result.write("{}: {}".format(projects, to_drops))
     reduced_no_samples_json = reduce_json_array(
         [{k: v for k, v in d.items() if k != 'samples'} for d in res]
     )
