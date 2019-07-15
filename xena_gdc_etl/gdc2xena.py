@@ -90,6 +90,14 @@ def gdc2xena(root_dir, projects, xena_dtypes, delete_raw_data=False):
             else:
                 dataset = GDCOmicset(project, dtype, root_dir)
             try:
+                file_name = project + "." + dtype + ".tsv"
+                if os.path.isfile(
+                    os.path.join(dataset.matrix_dir, file_name)
+                ):
+                    print(
+                        "Xena Matrix for {} found, skipping ...".format(dtype)
+                    )
+                    continue
                 dataset.download().transform().metadata()
                 if delete_raw_data:
                     print("Deleting raw data ...")
