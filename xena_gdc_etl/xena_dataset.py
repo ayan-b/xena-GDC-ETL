@@ -36,6 +36,8 @@ from .constants import (
     GDC_RELEASE_URL,
 )
 
+final_list = []
+
 
 def read_by_ext(filename, mode='r'):
     """Automatically decide how to open a file which might be compressed.
@@ -175,8 +177,11 @@ def read_clinical(fileobj):
         in root.xpath('@xsi:schemaLocation', namespaces=ns)[0].lower()
     )
     patient = {}
+    list_fields = []
     # "Dirty" extraction
     for child in root.xpath('.//*[not(*)]'):
+        field = child.tag.split('}', 1)[-1]
+        list_fields.append(field)
         try:
             patient[child.tag.split('}', 1)[-1]] = child.text.strip()
         except AttributeError:
@@ -207,6 +212,12 @@ def read_clinical(fileobj):
                 patient[child.tag.split('}', 1)[-1]] = child.text.strip()
             except AttributeError:
                 patient[child.tag.split('}', 1)[-1]] = ''
+    net = []
+    for field in list_fields:
+        if list_fields.count(field) > 1:
+            net.append(field)
+    # print(net)
+    final_list.extend(net)
     return pd.DataFrame({patient['bcr_patient_barcode']: patient}).T
 
 
@@ -1716,6 +1727,7 @@ class GDCPhenoset(XenaDataset):
         mkdir_p(self.matrix_dir)
         xena_matrix.to_csv(self.matrix, sep='\t', encoding='utf-8')
         print('\rXena matrix is saved at {}.'.format(self.matrix))
+        print(set(final_list))
         return self
 
 
