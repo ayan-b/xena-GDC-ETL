@@ -29,7 +29,12 @@ import json
 import time
 import shutil
 
-from .xena_dataset import GDCOmicset, GDCPhenoset, GDCSurvivalset
+from .xena_dataset import (
+    GDCOmicset,
+    GDCPhenoset,
+    GDCSurvivalset,
+    XenaPhenoset,
+)
 
 
 def gdc2xena(root_dir, projects, xena_dtypes, delete_raw_data=False):
@@ -90,7 +95,7 @@ def gdc2xena(root_dir, projects, xena_dtypes, delete_raw_data=False):
             else:
                 dataset = GDCOmicset(project, dtype, root_dir)
             try:
-                dataset.transform().metadata()
+                dataset.download().transform().metadata()
                 if delete_raw_data:
                     print("Deleting raw data ...")
                     shutil.rmtree(dataset.raw_data_dir)
