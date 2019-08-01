@@ -1727,8 +1727,7 @@ class GDCPhenoset(XenaDataset):
         mkdir_p(self.matrix_dir)
         xena_matrix.to_csv(self.matrix, sep='\t', encoding='utf-8')
         print('\rXena matrix is saved at {}.'.format(self.matrix))
-        final_list = set(final_list)
-        print(final_list.sort())
+        print(set(final_list))
         return self
 
 

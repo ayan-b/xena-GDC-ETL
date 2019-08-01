@@ -33,7 +33,6 @@ from .xena_dataset import (
     GDCOmicset,
     GDCPhenoset,
     GDCSurvivalset,
-    XenaPhenoset,
 )
 
 
