@@ -187,7 +187,6 @@ def read_clinical(fileobj, final_list):
             patient[child.tag.split('}', 1)[-1]] = child.text.strip()
         except AttributeError:
             patient[child.tag.split('}', 1)[-1]] = ''
-    print(final_list)
     # Redo 'race'
     if 'race_list' in patient:
         del patient['race_list']
@@ -1725,6 +1724,7 @@ class GDCPhenoset(XenaDataset):
         mkdir_p(self.matrix_dir)
         xena_matrix.to_csv(self.matrix, sep='\t', encoding='utf-8')
         print('\rXena matrix is saved at {}.'.format(self.matrix))
+        print(final_list)
         import pickle
         with open("store-{}".format(self.projects), "wb") as fp:
             pickle.dump(final_list, fp)
