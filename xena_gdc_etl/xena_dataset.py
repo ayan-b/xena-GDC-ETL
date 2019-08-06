@@ -142,7 +142,7 @@ def read_biospecimen(fileobj):
     return df
 
 
-def read_clinical(fileobj):
+def read_clinical(fileobj, final_list):
     """Extract info from GDC's clinical supplement and re-organize them into a
     pandas DataFrame.
 
@@ -176,12 +176,18 @@ def read_clinical(fileobj):
         in root.xpath('@xsi:schemaLocation', namespaces=ns)[0].lower()
     )
     patient = {}
+    seen_list = set()
     # "Dirty" extraction
     for child in root.xpath('.//*[not(*)]'):
+        field = child.tag.split('}', 1)[-1]
+        if field in seen_list:
+            final_list.add(field)
+        seen_list.add(field)
         try:
             patient[child.tag.split('}', 1)[-1]] = child.text.strip()
         except AttributeError:
             patient[child.tag.split('}', 1)[-1]] = ''
+    print(final_list)
     # Redo 'race'
     if 'race_list' in patient:
         del patient['race_list']
@@ -208,7 +214,7 @@ def read_clinical(fileobj):
                 patient[child.tag.split('}', 1)[-1]] = child.text.strip()
             except AttributeError:
                 patient[child.tag.split('}', 1)[-1]] = ''
-    return pd.DataFrame({patient['bcr_patient_barcode']: patient}).T
+    return pd.DataFrame({patient['bcr_patient_barcode']: patient}).T, final_list
 
 
 def merge_cnv(filelist):
@@ -1544,13 +1550,14 @@ class GDCPhenoset(XenaDataset):
         count = 0
         bio_dfs = []
         clin_dfs = []
+        final_list = set()
         for path in self.raw_data_list:
             count = count + 1
             print('\rProcessing {}/{} file...'.format(count, total), end='')
             sys.stdout.flush()
             # `read_biospecimen` and `read_clinical` will check file format
             try:
-                df = read_clinical(path)
+                df, final_list = read_clinical(path, final_list)
                 if not df.empty:
                     clin_dfs.append(df)
             except Exception:
@@ -1560,6 +1567,7 @@ class GDCPhenoset(XenaDataset):
                 except Exception:
                     raise TypeError('Fail to process file {}.'.format(path))
         print('\rAll {} files have been processed. '.format(total))
+        print(final_list)
         try:
             bio_matrix = (
                 pd.concat(bio_dfs, axis=0)
@@ -1717,6 +1725,9 @@ class GDCPhenoset(XenaDataset):
         mkdir_p(self.matrix_dir)
         xena_matrix.to_csv(self.matrix, sep='\t', encoding='utf-8')
         print('\rXena matrix is saved at {}.'.format(self.matrix))
+        import pickle
+        with open("store-{}".format(self.projects), "wb") as fp:
+            pickle.dump(final_list, fp)
         return self
 
 
